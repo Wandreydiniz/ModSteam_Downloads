@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Visualizar Mod</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial;
+  background: #0b0b0b;
+  color: white;
+  padding: 15px;
+}
+
+.box {
+  background: #151515;
+  padding: 15px;
+  border-radius: 15px;
+}
+
+img {
+  width: 100%;
+  border-radius: 12px;
+}
+
+button {
+  margin-top: 15px;
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 20px;
+  background: #00c853;
+  font-weight: bold;
+}
+
+.back {
+  margin-bottom: 10px;
+  cursor: pointer;
+  color: #00c853;
+}
+</style>
+</head>
+
+<body>
+
+<div class="back" onclick="history.back()">← Voltar</div>
+
+<div class="box" id="content">Carregando...</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+const app = initializeApp({
+  databaseURL: "https://dayzozmbi-server-default-rtdb.firebaseio.com"
+});
+const db = getDatabase(app);
+
+// PEGAR ID
+const params = new URLSearchParams(window.location.search);
+const id = params.get("id");
+
+if(!id){
+  document.getElementById("content").innerHTML = "Mod não encontrado.";
+  throw new Error("Sem ID");
+}
+
+// BUSCAR NO FIREBASE
+const snap = await get(ref(db, "mods/" + id));
+
+if(!snap.exists()){
+  document.getElementById("content").innerHTML = "Mod não encontrado.";
+  throw new Error("Não existe");
+}
+
+const mod = snap.val();
+
+// RENDER
+document.getElementById("content").innerHTML = `
+  <img src="${mod.iconURL}">
+  <h2>${mod.nome}</h2>
+  <p>${mod.descricao || ""}</p>
+
+  <button onclick="baixar()">⬇ Baixar</button>
+`;
+
+// DOWNLOAD
+window.baixar = ()=>{
+  const a = document.createElement("a");
+  a.href = mod.zipURL;
+  a.click();
+};
+</script>
+
+</body>
+</html>

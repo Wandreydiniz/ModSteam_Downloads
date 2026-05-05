@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ModSteam Pro</title>
+
+<style>
+body { margin: 0; font-family: Arial; background: #0b0b0b; color: white; }
+
+.header {
+  padding: 15px;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.menu-btn { font-size: 22px; cursor: pointer; }
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: -250px;
+  width: 250px;
+  height: 100%;
+  background: #111;
+  transition: 0.3s;
+  padding-top: 20px;
+}
+
+.sidebar a {
+  display: block;
+  padding: 15px;
+  color: white;
+  text-decoration: none;
+}
+
+.sidebar.open { left: 0; }
+
+.search { padding: 10px; }
+
+.search input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 25px;
+  border: none;
+  background: #1f1f1f;
+  color: white;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+  padding: 10px;
+}
+
+.card {
+  background: #151515;
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.card img {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+}
+
+.card-title {
+  padding: 8px;
+  font-size: 13px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <div class="menu-btn" onclick="toggleMenu()">☰</div>
+  ModSteam Pro
+</div>
+
+<div class="search">
+  <input type="text" id="busca" placeholder="Pesquisar mods...">
+</div>
+
+<div id="grid" class="grid"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+const app = initializeApp({
+  databaseURL: "https://dayzozmbi-server-default-rtdb.firebaseio.com"
+});
+const db = getDatabase(app);
+
+let mods = [];
+
+window.toggleMenu = ()=>{};
+
+function render(){
+  const grid = document.getElementById("grid");
+  grid.innerHTML = "";
+
+  const search = document.getElementById("busca").value.toLowerCase();
+
+  mods
+  .filter(m => (m.nome||"").toLowerCase().includes(search))
+  .forEach(m=>{
+    const div = document.createElement("div");
+    div.className = "card";
+
+    div.innerHTML = `
+      <img src="${m.iconURL}">
+      <div class="card-title">${m.nome}</div>
+    `;
+
+    // 🔥 LINK COMPARTILHÁVEL
+    div.onclick = ()=>{
+      window.location.href = "PaginaVisual.html?id=" + m.id;
+    };
+
+    grid.appendChild(div);
+  });
+}
+
+document.getElementById("busca").addEventListener("input", render);
+
+onValue(ref(db,"mods"),snap=>{
+  mods=[];
+  snap.forEach(i=>{
+    let d = i.val();
+    d.id = i.key; // 👈 ESSENCIAL
+    mods.push(d);
+  });
+  render();
+});
+</script>
+
+</body>
+</html>
