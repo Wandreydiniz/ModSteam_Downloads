@@ -64,7 +64,7 @@ body { margin: 0; font-family: Arial; background: #0b0b0b; color: white; }
   padding: 15px;
 }
 
-/* TOPO PLAY STORE */
+/* TOPO */
 .top {
   display: flex;
   gap: 15px;
@@ -89,7 +89,7 @@ body { margin: 0; font-family: Arial; background: #0b0b0b; color: white; }
   margin-top: 3px;
 }
 
-/* BOTÃO */
+/* BOTÕES */
 .download-btn {
   margin-top: 15px;
   width: 100%;
@@ -99,9 +99,22 @@ body { margin: 0; font-family: Arial; background: #0b0b0b; color: white; }
   background: #00c853;
   font-weight: bold;
   font-size: 15px;
+  cursor: pointer;
 }
 
-/* GALERIA PLAY STORE */
+.share-btn {
+  margin-top: 10px;
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 25px;
+  background: #2196f3;
+  font-weight: bold;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+/* GALERIA */
 .gallery {
   margin-top: 20px;
   display: flex;
@@ -155,6 +168,7 @@ import { getDatabase, ref, get, runTransaction } from "https://www.gstatic.com/f
 const app = initializeApp({
   databaseURL: "https://dayzozmbi-server-default-rtdb.firebaseio.com"
 });
+
 const db = getDatabase(app);
 
 // MENU
@@ -163,7 +177,7 @@ window.toggleMenu = ()=>{
   document.getElementById("overlay").classList.toggle("show");
 };
 
-// PEGAR ID
+// ID MOD
 const params = new URLSearchParams(window.location.search);
 const id = params.get("id");
 
@@ -180,19 +194,30 @@ if(!snap.exists()){
 
 const m = snap.val();
 
+const dataFormatada = m.data
+  ? new Date(m.data).toLocaleDateString("pt-BR")
+  : "N/A";
+
 // RENDER
 document.getElementById("content").innerHTML = `
   <div class="top">
     <img src="${m.iconURL}">
     <div class="top-info">
       <h2>${m.nome}</h2>
+
       <div class="meta">Versão ${m.versao || "N/A"}</div>
       <div class="meta">📥 ${m.downloads || 0} downloads</div>
+      <div class="meta">📦 ${m.tamanhoMB || "?"} MB</div>
+      <div class="meta">📅 ${dataFormatada}</div>
     </div>
   </div>
 
   <button class="download-btn" onclick="baixar()">
     ⬇ Baixar
+  </button>
+
+  <button class="share-btn" onclick="compartilhar()">
+    🔗 Compartilhar
   </button>
 
   <div class="gallery">
@@ -204,7 +229,7 @@ document.getElementById("content").innerHTML = `
   </div>
 `;
 
-// DOWNLOAD + CONTADOR
+// DOWNLOAD
 window.baixar = ()=>{
   runTransaction(ref(db,"mods/"+id+"/downloads"), val=>{
     return (val||0)+1;
@@ -213,6 +238,22 @@ window.baixar = ()=>{
   const a = document.createElement("a");
   a.href = m.zipURL;
   a.click();
+};
+
+// SHARE
+window.compartilhar = () => {
+  const url = window.location.href;
+
+  if (navigator.share) {
+    navigator.share({
+      title: m.nome,
+      text: "Veja esse mod!",
+      url: url
+    });
+  } else {
+    const wpp = "https://wa.me/?text=" + encodeURIComponent(m.nome + " " + url);
+    window.open(wpp, "_blank");
+  }
 };
 </script>
 
