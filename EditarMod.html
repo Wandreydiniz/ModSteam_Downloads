@@ -266,6 +266,10 @@ if(!usuario){
 
 }
 
+/* ADM */
+const isADM =
+usuario.nick === "ADM";
+
 /* ID MOD */
 const params =
 new URLSearchParams(window.location.search);
@@ -301,7 +305,11 @@ const mod =
 snap.val();
 
 /* SEGURANÇA */
-if(mod.autorNick !== usuario.nick){
+if(
+  mod.autorNick !== usuario.nick
+  &&
+  !isADM
+){
 
   alert("Esse mod não é seu.");
 
@@ -445,6 +453,18 @@ document.getElementById("saveBtn")
 
     }
 
+    /* TAMANHO */
+    let tamanhoMB =
+    mod.tamanhoMB || "0";
+
+    if(zip){
+
+      tamanhoMB =
+      (zip.size / 1024 / 1024)
+      .toFixed(2);
+
+    }
+
     /* UPDATE */
     await update(modRef,{
 
@@ -457,6 +477,8 @@ document.getElementById("saveBtn")
       iconURL,
 
       imagens: imgs,
+
+      tamanhoMB,
 
       ultimaEdicao:
       Date.now()
