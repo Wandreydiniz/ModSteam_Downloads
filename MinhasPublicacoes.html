@@ -236,7 +236,8 @@ import {
   getDatabase,
   ref,
   onValue,
-  push
+  push,
+  get
 }
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
@@ -283,9 +284,9 @@ document.getElementById("nickUser")
 .innerText = usuario.nick;
 
 /* ABRIR UPLOAD */
-window.abrirUpload = ()=>{
+window.abrirUpload = async ()=>{
 
-  /* ADM PODE */
+  /* ADM */
   if(usuario.nick === "ADM"){
 
     location.href =
@@ -295,8 +296,19 @@ window.abrirUpload = ()=>{
 
   }
 
-  /* SEM AUTORIZAÇÃO */
-  if(!usuario.autorizadoUpload){
+  /* VERIFICAR FIREBASE */
+  const snap = await get(
+    ref(
+      db,
+      "usuariosAutorizados/" + usuario.nick
+    )
+  );
+
+  const autorizado =
+  snap.exists();
+
+  /* NÃO AUTORIZADO */
+  if(!autorizado){
 
     document.getElementById(
       "solicitarModal"
