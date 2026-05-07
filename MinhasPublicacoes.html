@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
@@ -6,228 +6,321 @@
 <title>Minhas Publicações</title>
 
 <style>
-body {
-  margin: 0;
-  font-family: Arial;
-  background: #0b0b0b;
-  color: white;
+body{
+  margin:0;
+  font-family:Arial;
+  background:#0b0b0b;
+  color:white;
 }
 
-.header {
-  padding: 15px;
-  font-size: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-}
-
-.header-left{
+.header{
+  padding:15px;
+  font-size:18px;
   display:flex;
   align-items:center;
-  gap:10px;
+  justify-content:space-between;
+  background:#111;
+  position:sticky;
+  top:0;
+  z-index:100;
 }
 
-.menu-btn {
-  font-size: 22px;
-  cursor: pointer;
-}
-
-.login-btn{
-  background:#00c853;
-  color:black;
-  border:none;
-  padding:10px 16px;
-  border-radius:20px;
-  font-weight:bold;
+.back-btn{
+  font-size:22px;
   cursor:pointer;
-  max-width:140px;
+}
+
+.user{
+  font-size:14px;
+  color:#00c853;
+}
+
+.container{
+  padding:12px;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+  gap:12px;
+}
+
+.card{
+  background:#151515;
+  border-radius:14px;
+  overflow:hidden;
+  cursor:pointer;
+}
+
+.card-img{
+  position:relative;
+  width:100%;
+  height:150px;
+  background:#222;
+}
+
+.card-img img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:none;
+}
+
+.loader{
+  position:absolute;
+  top:50%;
+  left:50%;
+  width:26px;
+  height:26px;
+  border:3px solid #333;
+  border-top:3px solid #00c853;
+  border-radius:50%;
+  transform:translate(-50%, -50%);
+  animation:spin 1s linear infinite;
+}
+
+@keyframes spin{
+  0%{
+    transform:translate(-50%, -50%) rotate(0deg);
+  }
+  100%{
+    transform:translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+.card-info{
+  padding:10px;
+}
+
+.card-title{
+  font-size:14px;
+  font-weight:bold;
+  white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
-  white-space:nowrap;
 }
 
-.sidebar {
-  position: fixed;
-  top: 0;
-  left: -250px;
-  width: 250px;
-  height: 100%;
-  background: #111;
-  transition: 0.3s;
-  padding-top: 20px;
-  z-index: 1000;
-}
-
-.sidebar a {
-  display: block;
-  padding: 15px;
-  color: white;
-  text-decoration: none;
-  border-bottom: 1px solid #222;
-}
-
-.sidebar a.active {
-  background: #00c853;
-  color: black;
-  font-weight: bold;
-}
-
-.sidebar a:hover {
-  background: #1f1f1f;
-}
-
-.sidebar.open {
-  left: 0;
-}
-
-.overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.5);
-  display: none;
-  z-index: 999;
-}
-
-.overlay.show {
-  display: block;
-}
-
-.content{
-  padding:20px;
+.card-meta{
+  font-size:12px;
+  color:#aaa;
+  margin-top:4px;
 }
 
 .empty{
-  margin-top:40px;
   text-align:center;
-  color:#888;
+  margin-top:50px;
+  color:#777;
   font-size:15px;
 }
 
 /* BOTÃO FLUTUANTE */
-.fab-upload{
+.fab{
   position:fixed;
   right:20px;
   bottom:20px;
-  width:65px;
-  height:65px;
-  border:none;
+  width:60px;
+  height:60px;
   border-radius:50%;
+  border:none;
   background:#00c853;
   color:black;
-  font-size:30px;
+  font-size:34px;
   font-weight:bold;
   cursor:pointer;
-  box-shadow:0 4px 12px rgba(0,0,0,0.5);
-  z-index:2000;
-}
-
-.fab-upload:hover{
-  transform:scale(1.05);
+  box-shadow:0 4px 12px rgba(0,0,0,0.4);
 }
 </style>
 </head>
 
 <body>
 
-<div class="sidebar" id="sidebar">
-
-  <a href="index.html">
-    Mods Project Zomboid
-  </a>
-
-  <a href="download.html">
-    Download Project Zomboid
-  </a>
-
-  <a href="MinhasPublicacoes.html" class="active">
-    📦 Minha Publicações
-  </a>
-
-  <a href="#">
-    Servidores BR
-  </a>
-
-  <a href="#">
-    Servidores USA
-  </a>
-
-  <a href="#">
-    Discord
-  </a>
-
-</div>
-
-<div class="overlay" id="overlay" onclick="toggleMenu()"></div>
-
 <div class="header">
 
-  <div class="header-left">
-    <div class="menu-btn" onclick="toggleMenu()">☰</div>
-    Minha Publicações
+  <div class="back-btn" onclick="voltar()">
+    ←
   </div>
 
-  <button class="login-btn" id="loginBtn">
-    Login
-  </button>
+  <div>
+    📦 Minhas Publicações
+  </div>
+
+  <div class="user" id="nickUser">
+    ...
+  </div>
 
 </div>
 
-<div class="content">
+<div class="container">
 
-  <div class="empty">
-    Você ainda não possui publicações.
+  <div class="grid" id="grid"></div>
+
+  <div class="empty" id="empty" style="display:none;">
+    Você ainda não publicou nenhum mod.
   </div>
 
 </div>
 
 <!-- BOTÃO FLUTUANTE -->
-<button class="fab-upload" id="uploadBtn">
-  ＋
+<button class="fab" onclick="abrirUpload()">
+  +
 </button>
 
-<script>
+<script type="module">
 
-const usuario =
-  JSON.parse(localStorage.getItem("usuarioModSteam"));
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
-const loginBtn =
-  document.getElementById("loginBtn");
-
-if(usuario && usuario.nick){
-
-  loginBtn.innerText = usuario.nick;
-
-}else{
-
-  loginBtn.innerText = "Login";
-
+import {
+  getDatabase,
+  ref,
+  onValue
 }
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-loginBtn.onclick = ()=>{
+const firebaseConfig = {
+
+  apiKey: "AIzaSyB5A-ySceXCFRQ7iSCnOA68nRJqYpK6DQc",
+
+  databaseURL:
+  "https://dayzozmbi-server-default-rtdb.firebaseio.com",
+
+  projectId: "dayzozmbi-server",
+
+  storageBucket:
+  "dayzozmbi-server.firebasestorage.app",
+
+  messagingSenderId: "221905253103",
+
+  appId:
+  "1:221905253103:android:fc1bc06782cf5735c4611a"
+};
+
+const app = initializeApp(firebaseConfig);
+
+const db = getDatabase(app);
+
+/* USUÁRIO */
+const usuario =
+JSON.parse(localStorage.getItem("usuarioModSteam"));
+
+if(!usuario || !usuario.nick){
+
+  alert("Faça login primeiro!");
 
   window.location.href = "Login.html";
 
-};
+}
 
-window.toggleMenu = ()=>{
+document.getElementById("nickUser")
+.innerText = usuario.nick;
 
-  document.getElementById("sidebar")
-    .classList.toggle("open");
+/* BOTÕES */
+window.voltar = ()=>{
 
-  document.getElementById("overlay")
-    .classList.toggle("show");
-
-};
-
-/* ABRIR UPLOAD */
-document
-  .getElementById("uploadBtn")
-  .onclick = ()=>{
-
-    window.location.href = "Uplods.html";
+  window.location.href = "index.html";
 
 };
+
+window.abrirUpload = ()=>{
+
+  window.location.href = "Uplods.html";
+
+};
+
+/* GRID */
+const grid =
+document.getElementById("grid");
+
+const empty =
+document.getElementById("empty");
+
+/* CARREGAR MODS */
+onValue(ref(db,"mods"), snap=>{
+
+  grid.innerHTML = "";
+
+  let encontrou = false;
+
+  snap.forEach(i=>{
+
+    const m = i.val();
+
+    /* MOSTRAR APENAS MODS DO USUÁRIO */
+    if(m.autorNick !== usuario.nick){
+
+      return;
+
+    }
+
+    encontrou = true;
+
+    const card =
+    document.createElement("div");
+
+    card.className = "card";
+
+    card.innerHTML = `
+      <div class="card-img">
+
+        <div class="loader"></div>
+
+        <img src="${m.iconURL}">
+
+      </div>
+
+      <div class="card-info">
+
+        <div class="card-title">
+          ${m.nome}
+        </div>
+
+        <div class="card-meta">
+          📥 ${m.downloads || 0} downloads
+        </div>
+
+        <div class="card-meta">
+          Versão ${m.versao || "N/A"}
+        </div>
+
+      </div>
+    `;
+
+    const img =
+    card.querySelector("img");
+
+    const loader =
+    card.querySelector(".loader");
+
+    img.onload = ()=>{
+
+      loader.style.display = "none";
+
+      img.style.display = "block";
+
+    };
+
+    card.onclick = ()=>{
+
+      window.location.href =
+      "PaginaVisual.html?id=" + i.key;
+
+    };
+
+    grid.appendChild(card);
+
+  });
+
+  if(!encontrou){
+
+    empty.style.display = "block";
+
+  }else{
+
+    empty.style.display = "none";
+
+  }
+
+});
 
 </script>
 
